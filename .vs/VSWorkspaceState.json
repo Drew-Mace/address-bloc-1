@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\address-bloc",
+    "\\address-bloc\\controllers",
+    "\\address-bloc\\db",
+    "\\address-bloc\\models",
+    "\\bloc_record",
+    "\\bloc_record\\lib",
+    "\\bloc_record\\lib\\bloc_record"
+  ],
+  "SelectedNode": "\\address-bloc\\models\\address_book.rb",
+  "PreviewInSolutionExplorer": false
+}
