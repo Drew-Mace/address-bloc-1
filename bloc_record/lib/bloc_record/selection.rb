@@ -3,6 +3,7 @@ require 'sqlite3'
 module Selection
 
 	def find(*ids)
+    raise TypeError.new("id/s need to positive integers") unless ids.is_a? Numeric
 		if ids.length == 1
 			find(ids.first)
 		else
@@ -27,6 +28,7 @@ module Selection
 	end
 
 	def find_one(attribute, value)
+    raise TypeError.new("#{attribute} isn't a valid attribute") unless attribute.is_a? String
 		row = connection.get_first_row <<-SQL
 		 SELECT #{columns.join ","} FROM #{table}
 		 WHERE #{attribute} = #{BlocRecord::Utility.sql_strings(value)};
@@ -36,6 +38,7 @@ module Selection
 	end
 
 	def find_by(attribute, value)
+    raise TypeError.new("#{attribute} isn't a valid attribute") unless attribute.is_a? String
 		row = connection.get_first_row <<-SQL
  		SELECT #{columns.join ","} FROM #{table}
  		WHERE #{attribute} = #{BlocRecord::Utility.sql_strings(value)};
@@ -45,6 +48,7 @@ module Selection
 	end
 
 	def take(num=1)
+    raise TypeError.new("#{num} needs to be a positive integer") unless num.is_a? Numeric
 		if num > 1
 			rows = connection.execute <<-SQL
 	 		 SELECT #{columns.join ","} FROM #{table}
@@ -104,17 +108,34 @@ module Selection
 		end
 	end
 
-	def find_each()
-		rows = connection.execute <<-SQL
-			SELECT #{columns.join ","} FROM #{table}
-			ORDER BY id
-			LIMIT #{} OFFSET #{};
-		SQL
-		rows
+	def find_each(hash)
+    if hash
+      rows = connection.execute <<-SQL
+        SELECT #{columns.join ","} FROM #{table}
+        ORDER BY id
+        LIMIT #{hash["batch_size"]} OFFSET #{hash["start"]};
+      SQL
+    else
+      rows = connection.execute <<-SQL
+        SELECT #{columns.join ","} FROM #{table}
+        ORDER BY id;
+      SQL
+    end
+
+    row_array = rows_to_array(rows)
+    row_array.each do |row|
+      yield(row)
+    end
 	end
 
-	def find_in_batches(start: nil, finish: nil, batch_size: 1000)
-		# take start and
+	def find_in_batches(hash)
+    rows = connection.execute <<-SQL
+      SELECT #{columns.join ","} FROM #{table}
+      ORDER BY id
+      LIMIT #{hash["limit"]} OFFSET #{hash["offset"]}
+    SQL
+
+    rows_to_array(rows)
 	end
 
 	def where(*args) ## where w/p params is the same as calling all columns in database
@@ -131,7 +152,13 @@ module Selection
 			end
 		end
 
-		sql =<<-SQL
+    if args.count == 0
+      rows = connection.execute <<-SQL
+        SELECT * FROM #{table};
+      SQL
+    end
+
+    sql =<<-SQL
 			SELECT #{columns.join ","} FROM #{table}
 			WHERE #{expression};
 		SQL
@@ -144,10 +171,17 @@ module Selection
 		if args.count > 1
 			order = args.join(",")
 		else
-			order = order.to_s # case when to handle if string, hash, etc...
+      case order.include?("DESC")
+      when Hash
+			  order = order.to_s
+      when Symbol
+        order = order.to_s
+      when String
+        order
+      end
 		end
 
-		if order.include?("DESC") || order.include?(:desc)
+		if order.include?("DESC")
 			rows = connection.execute <<-SQL
 				SELECT * FROM #{table}
 				ORDER BY #{order} + "DESC";
