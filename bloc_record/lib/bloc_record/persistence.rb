@@ -39,6 +39,49 @@ module Persistence
   end
 
   module ClassMethods
+
+    def destroy(*id)
+      if id.length > 1
+        where_clause = "WHERE id IN (#{id.join(",")});"
+      else
+        where_clause = "WHERE id in #{id.first};"
+      end
+
+      connection.execute <<-SQL
+        DELETE FROM #{table} #{where_clause}
+      SQL
+
+      true
+    end
+
+    def destroy
+      self.class.destroy(self.id)
+    end
+
+    def destroy_all(val)
+      if val.class == String
+        conditions = val.to_s
+      elsif val.class == Hash
+        conditions_hash = BlocRecord::Utility.convert_keys(conditions_hash)
+        conditions = conditions_hash.map { |key, value| "#{key}=#{BlocRecord::Utility.sql_strings(value)}"}.join(" and ")
+      elsif val.class == Array
+        conditions = val.join(",")
+      end
+
+      if conditions
+        connection.execute <<-SQL
+          DELETE FROM #{table}
+          WHERE #{conditions};
+        SQL
+      else
+        connection.execute <<-SQL
+        DELETE FROM #{table}
+        SQL
+      end
+
+      true
+    end
+
     def update_all(updates)
       update(nil, updates)
     end
