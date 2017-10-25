@@ -1,5 +1,6 @@
 module BlocRecord
- def self.connect_to(filename)
+ def self.connect_to(filename, arg)
+   arg = arg.to_sym
    @database_filename = filename
  end
 
