@@ -1,4 +1,5 @@
  require 'sqlite3'
+ require 'pg'
  require 'active_support/inflector'
 
  module Associations
