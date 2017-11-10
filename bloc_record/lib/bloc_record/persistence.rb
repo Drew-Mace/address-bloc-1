@@ -115,9 +115,9 @@ module Persistence
       end
 
       if ids.class == Fixnum
-        where_clause = "WHERE id = #{ids.join(" AND ")};"
+        where_clause = "WHERE id = #{ids.join(",")};"
       elsif ids.class = Array
-        where_clause = ids.empty? ? ";" : "WHERE id in (#{ids.join(" AND ")});"
+        where_clause = ids.empty? ? ";" : "WHERE id in (#{ids.join(",")});"
       else
         where_clause = ";"
       end
