@@ -115,9 +115,9 @@ module Persistence
       end
 
       if ids.class == Fixnum
-        where_clause = "WHERE id = #{ids};"
+        where_clause = "WHERE id = #{ids.join(" AND ")};"
       elsif ids.class = Array
-        where_clause = ids.empty? ? ";" : "WHERE id in (#{ids.join(",")});"
+        where_clause = ids.empty? ? ";" : "WHERE id in (#{ids.join(" AND ")});"
       else
         where_clause = ";"
       end
@@ -125,7 +125,7 @@ module Persistence
       connection.execute <<-SQL
         UPDATE #{table}
         SET #{updates_array * ","} #{where_clause}
-        SQL
+      SQL
 
         true
     end

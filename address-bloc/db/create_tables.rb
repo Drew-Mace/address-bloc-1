@@ -1,6 +1,8 @@
 require 'sqlite3'
+require 'pg'
 
 db = SQLite3::Database.new "db/address_bloc.sqlite"
+
 
 db.execute("DROP TABLE address_book;");
 db.execute("DROP TABLE entry;");
