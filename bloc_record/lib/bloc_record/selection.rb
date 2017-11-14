@@ -139,7 +139,7 @@ module Selection
     rows_to_array(rows)
 	end
 
-	def where(*args) ## where w/p params is the same as calling all columns in database
+	def where(ids, *args) ## where w/o params is the same as calling all columns in database
 		if args.count > 1
 			expression = args.shift
 			params = args
@@ -149,7 +149,7 @@ module Selection
 				expression = args.first
 			when Hash
 				expression_hash = BlocRecord::Utility.convert_keys(args.first)
-				expression = expression_hash.map { |key, value| "#{key}=#{BlocRecord::Utility.sql_strings(value)}"}.join(" and ")
+				expression = expression_hash.map { |key, value| "#{key}=#{BlocRecord::Utility.sql_strings(value)}"}.join(" AND ")
 			end
 		end
 
@@ -161,7 +161,8 @@ module Selection
 
     sql =<<-SQL
 			SELECT #{columns.join ","} FROM #{table}
-			WHERE #{expression};
+			WHERE #{expression}
+      AND id = #{ids}.join(" , ") ;
 		SQL
 
 		rows = connection.execute(sql, params)

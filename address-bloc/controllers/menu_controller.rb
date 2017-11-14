@@ -6,7 +6,17 @@ class MenuController
   attr_reader :address_book
 
   def initialize
-    @address_book = AddressBook.first
+    puts "Would you like to you SQLite3 of Postgres? Type 'sqlite' or 'pg' please."
+    connection = gets.to_s
+
+    case connection
+    when 'sqlite'
+      system "clear"
+      @address_book = AddressBook.first
+    when 'pg'
+      system "clear"
+      @address_book = AddressBook.first
+    end
   end
 
   def main_menu
