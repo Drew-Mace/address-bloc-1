@@ -38,7 +38,7 @@ require 'pg'
        output
      end
 
-     def destroy_all(val, id)
+     def destroy_all(val, ids)
        if val.class == String
          conditions = val.to_s
        elsif val.class == Hash
@@ -52,12 +52,12 @@ require 'pg'
          connection.execute <<-SQL
            DELETE FROM #{table}
            WHERE #{conditions}
-           AND id = #{id};
+           AND id IN (#{ids.join (",")});
          SQL
        else
          connection.execute <<-SQL
          DELETE FROM #{table}
-         WHERE id = #{id};
+         WHERE id IN (#{ids.join (",")});
          SQL
        end
 

@@ -76,7 +76,7 @@ module Persistence
         SQL
       else
         connection.execute <<-SQL
-        DELETE FROM #{table}
+        DELETE FROM #{table};
         SQL
       end
 
@@ -105,6 +105,8 @@ module Persistence
     end
 
     def update(ids, updates)
+      ids = self.map(&:id)
+
       if updates.class == Hash
         updates.each_with_index { |array, index| update(ids[index], array) }
       else
@@ -115,9 +117,9 @@ module Persistence
       end
 
       if ids.class == Fixnum
-        where_clause = "WHERE id = #{ids.join(",")};"
+        where_clause = "WHERE id IN (#{ids.join(",")});"
       elsif ids.class = Array
-        where_clause = ids.empty? ? ";" : "WHERE id in (#{ids.join(",")});"
+        where_clause = ids.empty? ? ";" : "WHERE id IN (#{ids.join(",")});"
       else
         where_clause = ";"
       end

@@ -160,9 +160,9 @@ module Selection
     end
 
     sql =<<-SQL
-			SELECT #{columns.join ","} FROM #{table}
+			SELECT #{columns.join(",")} FROM #{table}
 			WHERE #{expression}
-      AND id = #{ids}.join(" , ") ;
+      AND id IN (#{ids.join (",")});
 		SQL
 
 		rows = connection.execute(sql, params)
